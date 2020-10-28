@@ -9,7 +9,6 @@ You can use `cbmc-install.sh` to install the latest CBMC.
 ./cbmc-install.sh
 ```
 The default path to install `cbmc` bin file is `/usr/bin`.
-[link](../../templates/template-for-repository/proofs/Makefile.common) 
 
 ## Running Locally
 
@@ -18,7 +17,9 @@ You can start the CBMC Batch jobs locally by running
 python3 bench_table.py
 ```
 
-If you wish to change the configuration of `cbmc`, please 
+If you wish to change any configurations of `goto-cc`, `goto-instrument`, `cbmc`, please open and modify [Makefile.common](../../templates/template-for-repository/proofs/Makefile.common).
+
+For each benchmark, the logging output is summarized by an `log` file. You can also check logging file during each step at `logs` folder.
 
 ## Check the results
 
@@ -36,10 +37,10 @@ Once you done running `bench_table.py`, it will automatically generate a file na
         - Bounded model checking for ANSI C
         - CBMC detects all possible failed properties as default. It will terminate until all those violations determined.
 - Project and source file structure
-    - Project source files include inside `aws-c-common/source` directory
-    - Proof source files include inside `proof` directory and `cbmc/sources` directory
+    - Project source files included are loacted inside `aws-c-common/source` directory
+    - Proof source files included are loacted inside `proof` directory and `cbmc/sources` directory
     - Those files are specified for each benchmark inside each `../<bench_name>/makefile`
-- Process
+- Steps
     1. Compile (with link) the harness code into goto file via `goto-cc`
         - Example
             - Inputs
@@ -68,17 +69,17 @@ Once you done running `bench_table.py`, it will automatically generate a file na
                 - <benchmark_name>_harness.c1.goto
     2. Optionally fill static variable with unconstrained values
         - The --nondet-static flag causes CBMC to initialize static variables with unconstrained value (ignoring initializers and default zero-initialization).
-        - If not, goto-instrument with --nondet-static aws_add_size_checked_harness.c1.goto as aws_add_size_checked_harness.c2.goto
+        - If not, goto-instrument with --nondet-static <benchmark_name>.c1.goto as <benchmark_name>.c2.goto
     2. Use goto-instrument to omit unused functions (sharpens coverage calculations)
         - Flag used `-drop-unused-functions`
             - Function Pointer Removal
             - Virtual function removal
             - Cleaning inline assembler statements
             - Removing unused functions
-        - Input: aws_add_size_checked_harness.c2.goto
-        - Output: aws_add_size_checked_harness.c3.goto
+        - Input: <benchmark_name>_harness.c2.goto
+        - Output: <benchmark_name>_harness.c3.goto
     2. Use goto-instrument to omit initialization of unused global variables (reduces problem size)
         - Flag used --slice-global-inits
-        - Input: aws_add_size_checked_harness.c3.goto
-        - Output: aws_add_size_checked_harness.c4.goto
+        - Input: <benchmark_name>.c3.goto
+        - Output: <benchmark_name>.c4.goto
     2. Copy c4.goto into goto file as the final result
