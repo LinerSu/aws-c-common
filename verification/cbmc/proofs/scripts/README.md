@@ -26,11 +26,59 @@ Once you done running `bench_table.py`, it will automatically generate a file na
 
 ## Process to for each benchmark running
 
-- Tool used
-    - goto-cc
-        - goto-cc reads source code, and generates a goto-binary.
-        - It works for compilation and simplifies control flow
-    - goto-instrument
-        - goto-instrument reads a goto-binary, performs a given program transformation, and then writes the resulting program as goto-binary on disc.
-    - cbmc
+- Tools used
+    - `goto-cc`
+        - `goto-cc` reads the source code, and generates a goto-binary file as an output.
+        - It works for compilation and simplifies the program. E.g. remove program side effect (j = i++), control flow made explicit (continue, break -> goto), loops simplify to one form (while loop)
+    - `goto-instrument`
+        - `goto-instrument` reads a goto-binary, performs a given program transformation, and then writes the resulting program as goto-binary.
+    - `cbmc`
         - Bounded model checking for ANSI C
+        - CBMC detects all possible failed properties as default. It will terminate until all those violations determined.
+- Project and source file structure
+    - Project source files include inside `aws-c-common/source` directory
+    - Proof source files include inside `proof` directory and `cbmc/sources` directory
+    - Those files are specified for each benchmark inside each `../<bench_name>/makefile`
+- Process
+    1. Compile (with link) the harness code into goto file via `goto-cc`
+        - Example
+            - Inputs
+                - <benchmark_name>_harness.c
+                - sources/make_common_data_structures.c
+                - stubs/error.c
+                - ...
+            - Output: proof1.goto
+    2. Remove function body if neccesary 
+        - If not, copy proof1.goto into proof2.goto
+        - Otherwise, use `goto-instrument` to perform remove function body
+    2. Compile the project source files into goto file via goto-cc
+        - Example
+            - Inputs: source/common.c
+            - Output: project1.goto
+    2. Use goto-instrument to perform program transformation (use flag --remove-function-body)
+        - Remove function such as `aws_default_allocator`, …
+            - Input project1.goto
+            - Output project2.goto
+    2. Invoke goto-cc to set the entry point (--funtion aws_add_size_checked_harness)
+        - Link project and proof sources into the proof harness
+            - Input
+                - proof2.goto
+                - project2.goto
+            - Output
+                - <benchmark_name>_harness.c1.goto
+    2. Optionally fill static variable with unconstrained values
+        - The --nondet-static flag causes CBMC to initialize static variables with unconstrained value (ignoring initializers and default zero-initialization).
+        - If not, goto-instrument with --nondet-static aws_add_size_checked_harness.c1.goto as aws_add_size_checked_harness.c2.goto
+    2. Use goto-instrument to omit unused functions (sharpens coverage calculations)
+        - Flag used `-drop-unused-functions`
+            - Function Pointer Removal
+            - Virtual function removal
+            - Cleaning inline assembler statements
+            - Removing unused functions
+        - Input: aws_add_size_checked_harness.c2.goto
+        - Output: aws_add_size_checked_harness.c3.goto
+    2. Use goto-instrument to omit initialization of unused global variables (reduces problem size)
+        - Flag used --slice-global-inits
+        - Input: aws_add_size_checked_harness.c3.goto
+        - Output: aws_add_size_checked_harness.c4.goto
+    2. Copy c4.goto into goto file as the final result
