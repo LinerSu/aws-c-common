@@ -82,4 +82,4 @@ Once you done running `bench_table.py`, it will automatically generate a file na
         - Flag used --slice-global-inits
         - Input: <benchmark_name>.c3.goto
         - Output: <benchmark_name>.c4.goto
-    2. Copy c4.goto into goto file as the final result
+    2. Copy <benchmark_name>.c4.goto into goto file as the final result
