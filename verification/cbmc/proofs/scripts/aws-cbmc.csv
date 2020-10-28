@@ -1,0 +1,2 @@
+bench name,total timing (seconds),iterations,total decision procedure timing (seconds),result (success/fail)
+aws_add_size_checked,1.222,1,0.113,success

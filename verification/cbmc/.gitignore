@@ -10,3 +10,6 @@ TAGS-*
 # Written by litani on each proof run
 .litani_cache_dir
 .ninja_log
+
+# Emitted for bench running
+log
