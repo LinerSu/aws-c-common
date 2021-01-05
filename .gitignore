@@ -34,6 +34,7 @@ _build
 build
 _build_*
 cmake-build*
+.ninja_deps
 
 # Compiled Object files
 *.slo

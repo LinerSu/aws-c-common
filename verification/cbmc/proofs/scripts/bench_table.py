@@ -41,7 +41,7 @@ def read_output_from_file(benchsubdir, file_name):
     try:
         file = open(file_name, 'r')
     except:
-        sys.exit("log file does not exits. Exit!")
+        sys.exit("result file does not exits. Exit!")
     data = file.readlines()
     res_data = []
     for i in range(len(attrs)):
@@ -87,7 +87,7 @@ def read_output_from_file(benchsubdir, file_name):
 def get_all_res_from_log_file(table_lst):
     idx_output = 0
     for benchsubdir in benchsubdirs:
-        log_path = "../"+benchsubdir+"/log"
+        log_path = "../"+benchsubdir+"/logs/result.txt"
         res_data = read_output_from_file(benchsubdir, log_path)
         table_lst.append(res_data)
     # for root, dirs, files in os.walk(benchdir+'/'+subdir):
@@ -113,7 +113,7 @@ def search_get_all_subdirse():
     # print(os.getcwd())
 
 def run_benchs_cbmc():
-    command_lst = ["rm -rf gotos", "(time make result) &> log"]
+    command_lst = ["rm -rf gotos logs log", "( time make result; ) 2> log", "cat log >> logs/result.txt "]
     print("Start making results ...")
     for benchsubdir in benchsubdirs:
         benchsubdirabspath = benchdirabspath + '/' + benchsubdir
