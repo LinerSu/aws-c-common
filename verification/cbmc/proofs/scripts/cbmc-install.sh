@@ -29,7 +29,7 @@ function cmake_cbmc {
         return
     fi
     make DOWNLOADER='wget' -C ${CBMCGIT}/cbmc/src minisat2-download
-    make -C ${CBMCGIT}/cbmc/src CXX=g++-5 -j8
+    make -C ${CBMCGIT}/cbmc/src CXX=g++ -j8
 }
 
 function cbmc_cp_bin_into_path {
@@ -43,7 +43,7 @@ function cbmc_cp_bin_into_path {
 function pre_pkgs_install_ckecking {
     echo "Starting installing pre-requsite pkgs";
     apt-get update -y;
-    for i in gcc-5 g++-5 flex bison make git libwww-perl patch ccache libc6-dev-i386 jq cmake; do
+    for i in gcc g++ flex bison make git libwww-perl patch ccache libc6-dev-i386 jq cmake; do
         command -v "$i" >/dev/null 2>&1 || {
             echo >&2 "Command $i required in \$PATH";
             apt-get install -y $i;
